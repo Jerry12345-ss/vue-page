@@ -5,6 +5,9 @@ on:
     branches:
       - main # Or your main branch name (e.g., master)
 
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -19,13 +22,19 @@ jobs:
           node-version: '20' # Or your preferred Node.js version
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Vue 3 app
         run: npm run build
+
+      - name: Prepare deploy folder
+        run: |
+          mv dist public_dist
+          rm -rf * .[^.]*
+          mv public_dist dist
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist # The directory where your built Vue app resides
+          publish_dir: ./dist
